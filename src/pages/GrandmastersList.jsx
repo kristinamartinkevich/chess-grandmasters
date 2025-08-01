@@ -1,43 +1,28 @@
-import React, { useState, useEffect } from 'react';
+import React, { useEffect } from 'react';
 import { Search, Crown, Users } from 'lucide-react';
-import { chessApi } from '../services/chessApi';
+import { useChessStore } from '../store/useChessStore';
 import { GrandmasterCard } from '../components/GrandmasterCard';
 import { LoadingSpinner } from '../components/LoadingSpinner';
 import { ErrorMessage } from '../components/ErrorMessage';
+import { Navbar, NavbarBrand } from '@nextui-org/react';
 
 export const GrandmastersList = () => {
-  const [grandmasters, setGrandmasters] = useState([]);
-  const [filteredGrandmasters, setFilteredGrandmasters] = useState([]);
-  const [loading, setLoading] = useState(true);
-  const [error, setError] = useState(null);
-  const [searchTerm, setSearchTerm] = useState('');
-
-  const fetchGrandmasters = async () => {
-    try {
-      setLoading(true);
-      setError(null);
-      const players = await chessApi.getGrandmasters();
-      setGrandmasters(players);
-      setFilteredGrandmasters(players);
-    } catch (err) {
-      setError(err.message);
-    } finally {
-      setLoading(false);
-    }
-  };
+  const {
+    grandmasters,
+    filteredGrandmasters,
+    grandmastersLoading,
+    grandmastersError,
+    searchTerm,
+    setSearchTerm,
+    fetchGrandmasters,
+    retryFetchGrandmasters
+  } = useChessStore();
 
   useEffect(() => {
     fetchGrandmasters();
   }, []);
 
-  useEffect(() => {
-    const filtered = grandmasters.filter(username =>
-      username.toLowerCase().includes(searchTerm.toLowerCase())
-    );
-    setFilteredGrandmasters(filtered);
-  }, [searchTerm, grandmasters]);
-
-  if (loading) {
+  if (grandmastersLoading) {
     return (
       <div className="min-h-screen bg-gray-50">
         <div className="container mx-auto px-4 py-8">
@@ -47,11 +32,11 @@ export const GrandmastersList = () => {
     );
   }
 
-  if (error) {
+  if (grandmastersError) {
     return (
       <div className="min-h-screen bg-gray-50">
         <div className="container mx-auto px-4 py-8">
-          <ErrorMessage message={error} onRetry={fetchGrandmasters} />
+          <ErrorMessage message={grandmastersError} onRetry={retryFetchGrandmasters} />
         </div>
       </div>
     );
@@ -62,12 +47,14 @@ export const GrandmastersList = () => {
       <div className="container mx-auto px-4 py-8">
         {/* Header */}
         <div className="text-center mb-8">
-          <div className="flex items-center justify-center gap-3 mb-4">
-            <Crown className="w-8 h-8 text-yellow-500" />
+          <Navbar className="flex items-center justify-center gap-3 mb-4">
+            <NavbarBrand>
+                          <Crown className="w-8 h-8 text-yellow-500" />
             <h1 className="text-4xl font-bold bg-gradient-to-r from-blue-600 to-purple-600 bg-clip-text text-transparent">
               Chess Grandmasters
             </h1>
-          </div>
+            </NavbarBrand>
+          </Navbar>
           <p className="text-gray-600 max-w-2xl mx-auto">
             Explore profiles of chess grandmasters from around the world. Click on any player to view their detailed profile and activity status.
           </p>

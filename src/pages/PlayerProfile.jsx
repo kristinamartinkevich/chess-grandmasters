@@ -1,49 +1,46 @@
-import React, { useState, useEffect } from 'react';
+import React, { useEffect } from 'react';
 import { useParams, Link } from 'react-router-dom';
 import { ArrowLeft, User, Calendar, Globe, Clock, MapPin, Trophy, ExternalLink } from 'lucide-react';
-import { chessApi } from '../services/chessApi';
+import { useChessStore } from '../store/useChessStore';
 import { useTimer } from '../hooks/useTimer';
 import { LoadingSpinner } from '../components/LoadingSpinner';
 import { ErrorMessage } from '../components/ErrorMessage';
 
 export const PlayerProfile = () => {
   const { username } = useParams();
-  const [player, setPlayer] = useState(null);
-  const [loading, setLoading] = useState(true);
-  const [error, setError] = useState(null);
+  const {
+    currentPlayer,
+    playerLoading,
+    playerError,
+    fetchPlayerProfile,
+    retryFetchPlayerProfile,
+    clearPlayerProfile
+  } = useChessStore();
 
-  const timeElapsed = useTimer(player?.last_online);
-
-  const fetchPlayerProfile = async () => {
-    try {
-      setLoading(true);
-      setError(null);
-      const playerData = await chessApi.getPlayerProfile(username);
-      setPlayer(playerData);
-    } catch (err) {
-      setError(err.message);
-    } finally {
-      setLoading(false);
-    }
-  };
+  const timeElapsed = useTimer(currentPlayer?.last_online);
 
   useEffect(() => {
     if (username) {
       fetchPlayerProfile();
     }
+    
+    // Cleanup when component unmounts
+    return () => {
+      clearPlayerProfile();
+    };
   }, [username]);
 
-  if (loading) {
+  if (playerLoading) {
     return (
       <div className="min-h-screen bg-gray-50">
-        <div className="container mx-auto px-4 py-8">
+        <div className="container mx-auto my-auto px-4 py-8">
           <LoadingSpinner size="large" />
         </div>
       </div>
     );
   }
 
-  if (error) {
+  if (playerError) {
     return (
       <div className="min-h-screen bg-gray-50">
         <div className="container mx-auto px-4 py-8">
@@ -54,13 +51,13 @@ export const PlayerProfile = () => {
             <ArrowLeft className="w-4 h-4" />
             Back to Grandmasters
           </Link>
-          <ErrorMessage message={error} onRetry={fetchPlayerProfile} />
+          <ErrorMessage message={playerError} onRetry={() => retryFetchPlayerProfile(username)} />
         </div>
       </div>
     );
   }
 
-  if (!player) {
+  if (!currentPlayer) {
     return null;
   }
 
@@ -81,6 +78,8 @@ export const PlayerProfile = () => {
     if (minutes < 60) return 'bg-yellow-500';
     return 'bg-gray-500';
   };
+
+  const player = currentPlayer;
 
   return (
     <div className="min-h-screen bg-gray-50">
