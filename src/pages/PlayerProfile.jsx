@@ -113,7 +113,7 @@ export const PlayerProfile = () => {
             
             <div className="flex-1">
               <div className="flex items-center gap-3 mb-2">
-                <h1 className="text-3xl font-bold text-gray-800">{player.username}</h1>
+                <h1 className="text-3xl font-bold text-gray-800">{username}</h1>
                 <Trophy className="w-6 h-6 text-yellow-500" />
               </div>
               {player.name && (
@@ -149,7 +149,7 @@ export const PlayerProfile = () => {
                 <User className="w-5 h-5 text-gray-400" />
                 <div>
                   <p className="text-sm text-gray-500">Username</p>
-                  <p className="font-medium text-gray-800">{player.username}</p>
+                  <p className="font-medium text-gray-800">{username}</p>
                 </div>
               </div>
               
