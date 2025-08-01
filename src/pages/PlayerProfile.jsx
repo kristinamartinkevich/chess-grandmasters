@@ -21,7 +21,7 @@ export const PlayerProfile = () => {
 
   useEffect(() => {
     if (username) {
-      fetchPlayerProfile();
+      fetchPlayerProfile(username);
     }
     
     // Cleanup when component unmounts
